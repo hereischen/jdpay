@@ -309,7 +309,7 @@ class Notification(JDPay):
 
     def parse_response(self, response):
         xml = base64.b64decode(response)
-        self.response_dict = xmltodict.parse(xml)["JD"]
+        self.response_dict = xmltodict.parse(xml)["CHINABANK"]
 
     def gen_md5_sign(self):
         h = MD5.new()
