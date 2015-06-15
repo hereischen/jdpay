@@ -10,9 +10,8 @@ import logging
 
 
 from llt.utils import smart_str
-from Crypto.Hash import SHA256
+from Crypto.Hash import SHA256, MD5
 from Crypto.Cipher import DES, DES3
-from Crypto.Hash import MD5
 from M2Crypto import RSA
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -124,7 +123,7 @@ class PayAccount(object):
         logger.info('Current PayAccount type is %s.' % type_category)
 
 
-class ChinaBankPay(object):
+class JDPay(object):
 
     def __init__(self, pay_account):
         self.pay_account = pay_account
@@ -134,7 +133,7 @@ class ChinaBankPay(object):
         self.params = input_dict
 
 
-class PayRequest(ChinaBankPay):
+class PayRequest(JDPay):
 
     """
     交易请求的类
@@ -184,7 +183,7 @@ class PayRequest(ChinaBankPay):
         return self.params
 
 
-class RefundandQueryBase(ChinaBankPay):
+class RefundandQueryBase(JDPay):
 
     def __init__(self, pay_account):
         super(RefundandQueryBase, self).__init__(pay_account=pay_account)
@@ -298,7 +297,7 @@ class QueryRequest(RefundandQueryBase):
         self.url = get_config('CB_QUERY_URL')
 
 
-class Notification(ChinaBankPay):
+class Notification(JDPay):
 
     """
     处理网银在线异步通知的类
@@ -310,7 +309,7 @@ class Notification(ChinaBankPay):
 
     def parse_response(self, response):
         xml = base64.b64decode(response)
-        self.response_dict = xmltodict.parse(xml)["CHINABANK"]
+        self.response_dict = xmltodict.parse(xml)["JD"]
 
     def gen_md5_sign(self):
         h = MD5.new()
