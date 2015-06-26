@@ -191,6 +191,7 @@ class RefundandQueryBase(JDPay):
         self.request_params = {'version': '1.0',
                                'merchantNum': self.pay_account.merchant_num}
         self.res_json = ''
+        self.res = {}
 
     def gen_encrypt_trade_data_and_sign(self):
 
@@ -253,24 +254,23 @@ class RefundandQueryBase(JDPay):
                 if match:
                     self.res_json = match.group()
 
-                    self.res_json = '{"code":"0","content":' + \
-                        self.res_json + '}'
-
                 else:
-                    self.res_json = '{"code":"1","content":{}}'
+                    raise ValueError(u'Failed to macth the final trade data.')
             else:
                 # 验签失败  不受信任的响应数据
-                self.res_json = '{"code":"1","content":{}}'
+                raise ValueError('Sign test failure, untrusted response data.')
 
-        else:
-            self.res_json = '{"code":"1","content":{}}'
+        self.res['resultCode'] = self.response_dict['resultCode']
+        self.res['resultMsg'] = self.response_dict[
+            'resultMsg'] if self.response_dict['resultMsg'] else ''
+        self.res['data'] = self.res_json if self.res_json else ''
 
     def post(self, input_dict):
         self.set_params(input_dict)
         self.gen_encrypt_trade_data_and_sign()
         self.post_request()
         self.verify_merchant_sign_parse_response()
-        return self.res_json
+        return self.res
 
 
 class RefundRequest(RefundandQueryBase):

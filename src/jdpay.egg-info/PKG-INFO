@@ -1,12 +1,12 @@
 Metadata-Version: 1.1
 Name: jdpay
-Version: 1.0
+Version: 1.1
 Summary: This is an unofficial python JingDong pay API.
 Home-page: https://github.com/hereischen/jdpay
 Author: Haotong Chen
 Author-email: hereischen@gmail.com
 License: BSD License
-Description: # JDPAY
+Description: # JDPAY京东支付
         ------
         ##Overview
         This is an unofficial python JingDong pay API, it contains 4 main classes:
@@ -82,11 +82,19 @@ Description: # JDPAY
         Changelog
         ==============================
         
+        1.1 - Jun.26, 2015
+        ------------------------------
+        
+        - Changed verify_merchant_sign_parse_response method.
+          It will raise exceptions if get date faild.
+          and the return res will macth JD's logic.
+        
         
         1.0 - Jun.15, 2015
         ------------------------------
         
         - Initail commit
+        
         
 Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
