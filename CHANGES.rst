@@ -1,6 +1,15 @@
 Changelog
 ==============================
 
+1.1.1 - Jun.30, 2015
+------------------------------
+
+- Changed get_notification method.
+  It will return a more detailed notification dict 
+  containning all the information provided.
+
+
+
 1.1 - Jun.26, 2015
 ------------------------------
 
