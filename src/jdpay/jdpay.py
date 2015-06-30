@@ -328,10 +328,19 @@ class Notification(JDPay):
         self.decrypted_res_dict = xmltodict.parse(res[:end_index + 7])
 
     def get_notification(self, response):
+        self.notification_dict = {}
         self.parse_response(response)
         self.gen_md5_sign()
         if self.response_dict['SIGN'] == self.md5_signture:
             self.decrypt_info()
-            return self.decrypted_res_dict['DATA']['RETURN'], self.decrypted_res_dict['DATA']['TRADE']
+            self.notification_dict['VERSION'] = self.response_dict['VERSION']
+            self.notification_dict['MERCHANT'] = self.response_dict['MERCHANT']
+            self.notification_dict['TERMINAL'] = self.response_dict['TERMINAL']
+            self.notification_dict['DATA'][
+                'RETURN'] = self.decrypted_res_dict['DATA']['RETURN']
+            self.notification_dict['DATA'][
+                'TRADE'] = self.decrypted_res_dict['DATA']['TRADE']
+            self.notification_dict['SIGN'] = self.response_dict['SIGN']
+            return sel.notification_dict
         else:
-            return {}, {}
+            return {}
