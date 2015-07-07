@@ -7,6 +7,9 @@ import binascii
 import re
 import os
 import logging
+import zipfile
+import requests
+import datetime
 
 
 from llt.utils import smart_str
@@ -288,7 +291,7 @@ class RefundRequest(RefundandQueryBase):
 class QueryRequest(RefundandQueryBase):
 
     """
-    处理查询请求的类 
+    处理查询请求的类
 
     """
 
@@ -344,3 +347,88 @@ class Notification(JDPay):
             return sel.notification_dict
         else:
             return {}
+
+
+class DownloadBill(object):
+
+    """
+    下载对账单的类:
+    以_0430.zip结尾的文件为DC账户流水，统一改名为JDDC_YYYYMMDD.zip
+    否则为DO账户流水,改名为JDDO_YYYYMMDD.zip
+
+    """
+
+    def __init__(self):
+        self.dowload_bill_merchant_num = get_config(
+            'CB_DOWNLOAD_BILL_MERCHANT_NUM')
+        self.dowload_bill_merchant_md5_key = get_config(
+            'CB_DOWNLOAD_BILL_MD5_KEY')
+        self.production_url = 'http://biz.wangyin.com/api/down.do'
+
+        self.JD_BILLS_PATH = get_config('BILLS_DIR')
+
+        self.dc_data = ''
+        self.do_data = ''
+        self.params = {}
+        self.params['owner'] = self.dowload_bill_merchant_num
+
+    def get_yesterday_date_str(self):
+        today = datetime.date.today()
+        t = datetime.timedelta(days=1)
+        yesterday = str(today - t).replace('-', '')
+        # e.g. 20150705
+        return yesterday
+
+    def base64_md5(self, post_data):
+        h = MD5.new()
+        b64_data = base64.b64encode(post_data).encode('utf-8')
+        h.update(b64_data + self.dowload_bill_merchant_md5_key)
+        md5_sign = h.hexdigest()
+        return md5_sign, b64_data
+
+    def request_data(self, post_data):
+        self.params['md5'], self.params['data'] = self.base64_md5(post_data)
+        print self.params
+
+        session = requests.Session()
+        resp = session.request('POST', url=self.production_url, data=self.params,
+                               stream=True, timeout=(5000, 5000))
+        resp.encoding = 'utf-8'
+
+        # logger.info(
+        #     'Current request date: %s, content length: %s.' % (resp.headers['date'], resp.headers['content-length'])))
+        print resp.headers
+        return resp.content
+
+    def get_bill(self, bill_date=None):
+        if bill_date:
+            self.bill_date = bill_date
+        else:
+            self.bill_date = self.get_yesterday_date_str()
+
+        month_dir = '%s' % self.bill_date[:6]
+
+        if not os.path.exists(os.path.join(self.JD_BILLS_PATH, month_dir)):
+            os.makedirs(os.path.join(self.JD_BILLS_PATH, month_dir))
+
+        bill_file_dir = os.path.join(self.JD_BILLS_PATH, month_dir)
+
+        # print bill_file_dir
+
+        self.dc_data = "{'name':'%saccountwater_0430.zip','path':'0001/0003'}" % self.bill_date
+        self.do_data = "{'name':'%saccountwater.zip','path':'0001/0003'}" % self.bill_date
+
+        # print self.dc_data
+        # print self.do_data
+
+        for data in (self.dc_data, self.do_data):
+            # download DC bill
+            if data is self.dc_data:
+                with open(os.path.join(bill_file_dir, 'JDDC_%s.zip' % self.bill_date), 'wb') as code:
+                    code.write(self.request_data(data))
+            # download DO bill
+            else:
+                with open(os.path.join(bill_file_dir, 'JDDO_%s.zip' % self.bill_date), 'wb') as code:
+                    code.write(self.request_data(data))
+# ========
+# a = DownloadBill().get_bill()
