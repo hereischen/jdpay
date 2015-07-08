@@ -1,5 +1,11 @@
 Changelog
 ==============================
+1.1.2 - Jul.08, 2015
+------------------------------
+
+- Added class DownloadBill(object) for bill downloading.
+
+
 
 1.1.1 - Jun.30, 2015
 ------------------------------

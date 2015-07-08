@@ -7,7 +7,7 @@ README = open(os.path.join(BASE_DIR, 'README.md')).read()
 CHANGES = open(os.path.join(BASE_DIR, 'CHANGES.rst')).read()
 
 setup(name='jdpay',
-      version='1.1.1',
+      version='1.1.2',
       description='This is an unofficial python JingDong pay API.',
       long_description=README + '\n\n' + CHANGES,
       author='Haotong Chen',
