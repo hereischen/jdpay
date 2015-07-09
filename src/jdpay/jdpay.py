@@ -354,7 +354,7 @@ class DownloadBill(object):
 
     """
     下载对账单的类:
-    调用get_bill(bill_date, suffix)时，
+    调用get_bill(bill_date='2015-07-07', suffix='_0430')时，
     如果suffix＝'_0430',下载的账单为DC.
     如果suffix＝'',下载的账单为DO.
 
@@ -374,13 +374,6 @@ class DownloadBill(object):
         self.params = {}
         self.params['owner'] = self.dowload_bill_merchant_num
         self.file_path = ''
-
-    def get_yesterday_date_str(self):
-        today = datetime.date.today()
-        t = datetime.timedelta(days=1)
-        # e.g. 20150705
-        yesterday = str(today - t)
-        return yesterday
 
     def base64_md5(self, post_data):
         h = MD5.new()
@@ -406,21 +399,53 @@ class DownloadBill(object):
         bill_log = BillLog.objects.filter(date=self.bill_date, channel='JDPAY')
         return bill_log
 
-    def is_wirte_file(self):
-        if self.resp.headers['content-length'] != '0':
-            # 写入数据库信息
-            if not self.is_record_writen():
-                BillLog.objects.create(date=self.bill_date,
-                                       channel='JDPAY',
-                                       bill_status='SUCCESS',
-                                       file_path=self.rel_dir_name,
-                                       remark='{}',
-                                       )
-                return self.resp.content
-            return False
+    def get_bill(self, bill_date, suffix=''):
 
+        self.bill_date = bill_date
+        # reformat date string from yyyy-mm-dd to yyyymmdd
+        self.rf_bill_date = str(int(self.bill_date.replace('-', '')) + 1)
+        month_dir = '%s' % self.rf_bill_date[:6]
+
+        if not os.path.exists(os.path.join(self.JD_BILLS_PATH, month_dir)):
+            os.makedirs(os.path.join(self.JD_BILLS_PATH, month_dir))
+
+        self.bill_file_dir = os.path.join(self.JD_BILLS_PATH, month_dir)
+
+        # print bill_file_dir
+
+        self.data = "{'name':'%saccountwater%s.zip','path':'0001/0003'}" % (
+            self.rf_bill_date, suffix)
+
+        # self.dc_data = "{'name':'%saccountwater_0430.zip','path':'0001/0003'}" % self.rf_bill_date
+        # self.do_data = "{'name':'%saccountwater.zip','path':'0001/0003'}" % self.rf_bill_date
+
+        # print self.dc_data
+        # print self.do_data
+        response = self.request_data(self.data)
+        self.file_path = os.path.join(
+            self.bill_file_dir, 'JDPay_%s.zip' % self.rf_bill_date)
+
+        if self.resp.headers['content-length'] != '0':
+            with open(self.file_path, 'wb') as code:
+                code.write(self.resp.content)
+                code.close()
+            # print self.file_path
+            zfile = zipfile.ZipFile(self.file_path)
+            for name in zfile.namelist():
+                zfile.extract(name, self.bill_file_dir)
+                zfile_path = os.path.join(self.bill_file_dir, name)
+                # print zfile_path
+                self.rel_dir_name = os.path.relpath(zfile_path)
+                if not self.is_record_writen():
+                    BillLog.objects.create(date=self.bill_date,
+                                           channel='JDPAY',
+                                           bill_status='SUCCESS',
+                                           file_path=self.rel_dir_name,
+                                           remark='{}',
+                                           )
+                os.remove(self.file_path)
         else:
-            # 写入数据库信息
+            # 不创建文件只写入数据库信息
             if self.resp.headers['return-code'] == '0003':
                 remark_dict = {}
                 remark_dict['return-code'] = self.resp.headers['return-code']
@@ -443,66 +468,6 @@ class DownloadBill(object):
                                            bill_status='FAIL',
                                            remark=remark,
                                            )
-            return False
 
-    def get_bill(self, bill_date=None, suffix=''):
-        if bill_date:
-            self.bill_date = bill_date
-        else:
-            self.bill_date = self.get_yesterday_date_str()
-        # reformat date string from yyyy-mm-dd to yyyymmdd
-        self.rf_bill_date = self.bill_date.replace('-', '')
-        month_dir = '%s' % self.rf_bill_date[:6]
 
-        if not os.path.exists(os.path.join(self.JD_BILLS_PATH, month_dir)):
-            os.makedirs(os.path.join(self.JD_BILLS_PATH, month_dir))
-
-        self.bill_file_dir = os.path.join(self.JD_BILLS_PATH, month_dir)
-
-        # print bill_file_dir
-
-        self.data = "{'name':'%saccountwater%s.zip','path':'0001/0003'}" % (
-            self.rf_bill_date, suffix)
-
-        # self.dc_data = "{'name':'%saccountwater_0430.zip','path':'0001/0003'}" % self.rf_bill_date
-        # self.do_data = "{'name':'%saccountwater.zip','path':'0001/0003'}" % self.rf_bill_date
-
-        # print self.dc_data
-        # print self.do_data
-        response = self.request_data(self.data)
-        self.file_path = os.path.join(
-            self.bill_file_dir, 'JDPay_%s.zip' % self.rf_bill_date)
-
-        self.rel_dir_name = os.path.relpath(self.file_path)
-        # print "!!!!!!!!!!!!>>>>>>>" + self.rel_dir_name
-        if self.is_wirte_file():
-            with open(self.file_path, 'wb') as code:
-                code.write(response)
-
-        # for data in (self.dc_data, self.do_data):
-        # download DC bill
-        #     if data is self.dc_data:
-        # download the bill when there is one.
-        #         response = self.request_data(data)
-        #         self.file_path = os.path.join(
-        #             self.bill_file_dir, 'JDDC_%s.zip' % self.rf_bill_date)
-
-        #         self.rel_dir_name = os.path.relpath(self.file_path)
-        #         print "!!!!!!!!!!!!>>>>>>>" + self.rel_dir_name
-        #         if self.is_wirte_file():
-        #             with open(self.file_path, 'wb') as code:
-        #                 code.write(response)
-        # download DO bill
-        #     else:
-        # download the bill when there is one.
-        #         response = self.request_data(data)
-        #         self.file_path = os.path.join(
-        #             self.bill_file_dir, 'JDDO_%s.zip' % self.rf_bill_date)
-
-        #         self.rel_dir_name = os.path.relpath(self.file_path)
-        #         print "!!!!!!!!!!!!>>>>>>>" + self.rel_dir_name
-        #         if self.is_wirte_file():
-        #             with open(self.file_path, 'wb') as code:
-        #                 code.write(response)
-# ========
-# a = DownloadBill().get_bill('2015-07-03', '_0430')
+# a = DownloadBill().get_bill(bill_date='2015-07-08', suffix='_0430')
