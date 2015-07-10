@@ -333,6 +333,7 @@ class Notification(JDPay):
 
     def get_notification(self, response):
         self.notification_dict = {}
+        self.notification_dict['DATA'] = {}
         self.parse_response(response)
         self.gen_md5_sign()
         if self.response_dict['SIGN'] == self.md5_signture:
@@ -345,7 +346,7 @@ class Notification(JDPay):
             self.notification_dict['DATA'][
                 'TRADE'] = self.decrypted_res_dict['DATA']['TRADE']
             self.notification_dict['SIGN'] = self.response_dict['SIGN']
-            return sel.notification_dict
+            return self.notification_dict
         else:
             return {}
 
@@ -468,6 +469,3 @@ class DownloadBill(object):
                                            bill_status='FAIL',
                                            remark=remark,
                                            )
-
-
-# a = DownloadBill().get_bill(bill_date='2015-07-08', suffix='_0430')
