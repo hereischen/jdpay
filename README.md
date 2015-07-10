@@ -7,6 +7,8 @@ This is an unofficial python JingDong pay API, it contains 4 main classes:
 > * RefundRequest
 > * QueryRequest
 > * Notification
+> * DownloadBill
+
 
 ------
 
@@ -66,6 +68,11 @@ This class handls notifications send from JingDong.
 ``` python
 return_dict, trade_dict = Notification(notification_account).get_notification(resp)
 
+```
+
+**DownloadBill**
+``` python
+bill = DownloadBill().get_bill(bill_date='2015-07-08', suffix='_0430')
 ```
 
 ------

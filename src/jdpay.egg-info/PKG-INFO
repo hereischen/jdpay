@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: jdpay
-Version: 1.1.3
+Version: 1.1.4
 Summary: This is an unofficial python JingDong pay API.
 Home-page: https://github.com/hereischen/jdpay
 Author: Haotong Chen
@@ -15,6 +15,8 @@ Description: # JDPAY京东支付
         > * RefundRequest
         > * QueryRequest
         > * Notification
+        > * DownloadBill
+        
         
         ------
         
@@ -76,11 +78,20 @@ Description: # JDPAY京东支付
         
         ```
         
+        **DownloadBill**
+        ``` python
+        bill = DownloadBill().get_bill(bill_date='2015-07-08', suffix='_0430')
+        ```
+        
         ------
         
         
         Changelog
         ==============================
+        
+        1.1.4 - Jul.10, 2015
+        ------------------------------
+        - Fixed a bug in Notification()
         
         1.1.3 - Jul.09, 2015
         ------------------------------
