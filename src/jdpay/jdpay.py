@@ -400,9 +400,22 @@ class DownloadBill(object):
         bill_log = BillLog.objects.filter(date=self.bill_date, channel='JDPAY')
         return bill_log
 
+    def date_validation(self, input_date):
+        today = datetime.date.today()
+        if input_date < today:
+            print input_date
+            return True
+        else:
+            raise ValueError(
+                "Bill_date given: [%s] should before today's date: [%s]." % (input_date, today))
+
     def get_bill(self, bill_date, suffix=''):
 
-        self.bill_date = bill_date
+        input_bill_date = datetime.datetime.strptime(
+            bill_date, '%Y-%m-%d').date()
+        if self.date_validation(input_bill_date):
+            self.bill_date = str(input_bill_date)
+
         # reformat date string from yyyy-mm-dd to yyyymmdd
         self.rf_bill_date = str(int(self.bill_date.replace('-', '')) + 1)
         month_dir = '%s' % self.rf_bill_date[:6]
@@ -469,3 +482,5 @@ class DownloadBill(object):
                                            bill_status='FAIL',
                                            remark=remark,
                                            )
+
+# bill = DownloadBill().get_bill(bill_date='2015-07-16', suffix='_0430')
