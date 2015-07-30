@@ -1,4 +1,2 @@
 include CHANGES.rst
 include README.md
-
-recursive-include docs *
