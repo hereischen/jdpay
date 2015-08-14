@@ -1,5 +1,9 @@
 Changelog
 ==============================
+1.1.6 - Auge.14, 2015
+------------------------------
+- a bug fixed in query fixed
+
 1.1.5 - Jul.17, 2015
 ------------------------------
 - Added date_validation() in DownloadBill()

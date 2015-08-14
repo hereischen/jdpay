@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: jdpay
-Version: 1.1.5
+Version: 1.1.6
 Summary: This is an unofficial python JingDong pay API.
 Home-page: https://github.com/hereischen/jdpay
 Author: Haotong Chen
@@ -84,10 +84,15 @@ Description: # JDPAY京东支付
         ```
         
         ------
+        That's it!
         
         
         Changelog
         ==============================
+        1.1.6 - Auge.14, 2015
+        ------------------------------
+        - a bug fixed in query fixed
+        
         1.1.5 - Jul.17, 2015
         ------------------------------
         - Added date_validation() in DownloadBill()

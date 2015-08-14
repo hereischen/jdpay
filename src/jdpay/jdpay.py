@@ -267,7 +267,7 @@ class RefundandQueryBase(JDPay):
         self.res['resultCode'] = self.response_dict['resultCode']
         self.res['resultMsg'] = self.response_dict[
             'resultMsg'] if self.response_dict['resultMsg'] else ''
-        self.res['data'] = self.res_json if self.res_json else ''
+        self.res['data'] = json.loads(self.res_json) if self.res_json else {}
 
     def post(self, input_dict):
         self.set_params(input_dict)
