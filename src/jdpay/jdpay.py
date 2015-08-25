@@ -23,6 +23,9 @@ from reconciliations.models import BillLog
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+# 京东下载bill的时间,每日13点
+GET_BILL_TIME = 13
+
 
 def get_config(name):
     """
@@ -402,9 +405,20 @@ class DownloadBill(object):
 
     def date_validation(self, input_date):
         today = datetime.date.today()
+        t = datetime.timedelta(days=1)
+        yesterday = (today - t)
+        now = datetime.datetime.now()
+        print input_date
         if input_date < today:
-            print input_date
-            return True
+            if input_date == yesterday:
+                if now.hour > GET_BILL_TIME:
+                    return True
+                else:
+                    raise ValueError(
+                        'Get bill time:[%s] must later then %s.' % (
+                            now.hour, GET_BILL_TIME))
+            else:
+                return True
         else:
             raise ValueError(
                 "Bill_date given: [%s] should before today's date: [%s]." % (input_date, today))
@@ -430,11 +444,6 @@ class DownloadBill(object):
         self.data = "{'name':'%saccountwater%s.zip','path':'0001/0003'}" % (
             self.rf_bill_date, suffix)
 
-        # self.dc_data = "{'name':'%saccountwater_0430.zip','path':'0001/0003'}" % self.rf_bill_date
-        # self.do_data = "{'name':'%saccountwater.zip','path':'0001/0003'}" % self.rf_bill_date
-
-        # print self.dc_data
-        # print self.do_data
         response = self.request_data(self.data)
         self.file_path = os.path.join(
             self.bill_file_dir, 'JDPay_%s.zip' % self.rf_bill_date)
@@ -483,4 +492,4 @@ class DownloadBill(object):
                                            remark=remark,
                                            )
 
-# bill = DownloadBill().get_bill(bill_date='2015-07-16', suffix='_0430')
+# bill = DownloadBill().get_bill(bill_date='2015-08-24', suffix='_0430')
