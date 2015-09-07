@@ -373,8 +373,6 @@ class DownloadBill(object):
 
         self.JD_BILLS_PATH = get_config('BILLS_DIR')
 
-        self.dc_data = ''
-        self.do_data = ''
         self.params = {}
         self.params['owner'] = self.dowload_bill_merchant_num
         self.file_path = ''
