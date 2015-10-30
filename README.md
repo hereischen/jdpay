@@ -1,7 +1,7 @@
 # JDPAY京东支付
 ------
 ##Overview
-This is an unofficial python JingDong pay API, it contains 4 main classes:
+This is a python JingDong Pay API, it contains 4 main classes:
 > * PayAccount
 > * PayRequest 
 > * RefundRequest

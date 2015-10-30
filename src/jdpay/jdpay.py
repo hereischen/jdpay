@@ -439,7 +439,7 @@ class DownloadBill(object):
 
         # print bill_file_dir
 
-        self.data = "{'name':'%saccountwater%s.zip','path':'0001/0003'}" % (
+        self.data = "{'name':'%saccountwater%s.zip','path':'0001/0001'}" % (
             self.rf_bill_date, suffix)
 
         response = self.request_data(self.data)
