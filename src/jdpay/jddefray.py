@@ -113,6 +113,8 @@ class JdDefray(object):
         signature = self.sha256(param_str, sha256_key)
         pkcs7_cert, pkcs7_pri_key = self.openssl_load_pkcs12_certs(you1ke_pfx, you1ke_psw)
         signed_data = self.pkcs7_sign(param_str, pkcs7_pri_key, pkcs7_cert)
+        # may need to be decode
+        #signed_data = base64.decodestring(signed_data)
         encrypt_data = self.pkcs7_encrypt(signed_data, pub_key_cer)
         self.param['sign_data'] = signature
         self.param['encrypt_data'] = encrypt_data
